@@ -22,7 +22,7 @@ import { PrScreenAdapter } from 'pr-screen-adapter'
 ```
 
 ```html
-<div class="list">
+<div>
   <PrScreenAdapter :width="5760" :height="1944" :maxAspectRatio="3.6">
     <div>正常页面内容</div>
   </PrScreenAdapter>
