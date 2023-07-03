@@ -1,0 +1,10 @@
+{
+  "name": "pr-screen-adapter",
+  "version": "1.1.0",
+  "description": "基于vue3 封装的一个自适应宽屏的组件。",
+  "type": "module",
+  "main": "./src/components/PrScreenAdapter/index.js",
+  "types": "./src/components/PrScreenAdapter/index.d.ts",
+  "author": "Breathe",
+  "license": "ISC"
+}
