@@ -47,8 +47,8 @@ const options = ref({
 
 // 初始化屏幕参数
 const initOptions = () => {
-  const innerWidth = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth
-  const innerHeight = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth
+  const innerWidth = window.innerWidth || document.documentElement.clientWidth
+  const innerHeight = window.innerHeight || document.documentElement.clientHeight
   let { width, height, maxAspectRatio } = props
   const ratio = width / height
   let _ratio = innerWidth / innerHeight
