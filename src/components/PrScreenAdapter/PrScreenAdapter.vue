@@ -41,40 +41,34 @@ const props = defineProps({
 const options = ref({
   width: 0, // 真实宽度
   height: 0, // 真实高度
-  clientWidth: 0, // 当前屏幕宽度
-  clientHeight: 0 // 当前屏幕高度
+  innerWidth: 0, // 当前屏幕宽度
+  innerHeight: 0 // 当前屏幕高度
 })
 
 // 初始化屏幕参数
 const initOptions = () => {
-  const { clientWidth, clientHeight } = document.documentElement
+  const innerWidth = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth
+  const innerHeight = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth
   let { width, height, maxAspectRatio } = props
   const ratio = width / height
-  let _ratio = clientWidth / clientHeight
+  let _ratio = innerWidth / innerHeight
   _ratio = Math.min(_ratio, maxAspectRatio)
   // 适配宽度
   if (ratio < _ratio) {
     width = (width / ratio) * _ratio
   }
-  options.value = { ...options.value, width, height, clientWidth, clientHeight }
-
+  options.value = { ...options.value, width, height, innerWidth, innerHeight }
   // console.log('\x1b[38;2;0;151;255m%c%s\x1b[0m', 'color:#0097ff;padding:16px 0;', `------->Breathe:options.value`, options.value)
 }
 initOptions()
 window.addEventListener('resize', initOptions) // 监听外层宽高
 
-// 截取数字
-const fixedMunber = (num: number) => {
-  const fixedNum = 100000
-  return parseInt(`${num * fixedNum}`) / fixedNum
-}
-
 // 计算缩放
 const Scale = computed(() => {
-  const { width, clientWidth, height, clientHeight } = options.value
-  if (!clientWidth) return 1
-  const scaleX = clientWidth / width
-  const scaleY = clientHeight / height
+  const { width, innerWidth, height, innerHeight } = options.value
+  if (!innerWidth) return 1
+  const scaleX = innerWidth / width
+  const scaleY = innerHeight / height
   // 根据屏幕宽高 取最小缩放比例
   let scale = Math.min(scaleX, scaleY)
   return props.overflowHidden ? scale : 1
@@ -82,12 +76,12 @@ const Scale = computed(() => {
 
 // 外部容器样式
 const StyleScreenAdapterOuter = computed(() => {
-  const { width, clientWidth, height, clientHeight } = options.value
+  const { width, innerWidth, height, innerHeight } = options.value
   // 计算距离上边距离
-  let top = (clientHeight - height * Scale.value) * 0.5
+  let top = (innerHeight - height) * Scale.value * 0.5
   top = Math.max(0, top)
   // 计算距离左边距离
-  let left = (clientWidth - width * Scale.value) * 0.5
+  let left = (innerWidth - width) * Scale.value * 0.5
   left = Math.max(0, left)
   let style = {
     'padding-top': `${top}px`,
