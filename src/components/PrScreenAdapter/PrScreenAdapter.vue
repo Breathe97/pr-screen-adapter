@@ -18,23 +18,23 @@ const props = defineProps({
   // 期望宽度
   width: {
     type: [Number],
-    default: () => 5760
+    default: () => 5760,
   },
   // 期望高度
   height: {
     type: [Number],
-    default: () => 1620
+    default: () => 1620,
   },
   // 最大宽高比 在基数内自动校准宽度 以达到充满两边
   maxAspectRatio: {
     type: [Number],
-    default: () => 4
+    default: () => 4,
   },
   // 超出隐藏 默认开启 关闭时不缩放 但是可以左右滚动
   overflowHidden: {
     type: [Boolean],
-    default: () => true
-  }
+    default: () => true,
+  },
 })
 
 // 要用到的一些参数
@@ -42,7 +42,7 @@ const options = ref({
   width: 0, // 真实宽度
   height: 0, // 真实高度
   innerWidth: 0, // 当前屏幕宽度
-  innerHeight: 0 // 当前屏幕高度
+  innerHeight: 0, // 当前屏幕高度
 })
 
 // 初始化屏幕参数
@@ -78,14 +78,16 @@ const Scale = computed(() => {
 const StyleScreenAdapterOuter = computed(() => {
   const { width, innerWidth, height, innerHeight } = options.value
   // 计算距离上边距离
-  let top = (innerHeight - height) * Scale.value * 0.5
-  top = Math.max(0, top)
+  let offsetY = (innerHeight - height * Scale.value) * 0.5
+  offsetY = Math.max(0, offsetY)
   // 计算距离左边距离
-  let left = (innerWidth - width) * Scale.value * 0.5
-  left = Math.max(0, left)
+  let offsetX = (innerWidth - width * Scale.value) * 0.5
+  offsetX = Math.max(0, offsetX)
   let style = {
-    'padding-top': `${top}px`,
-    'padding-left': `${left}px`
+    'padding-top': `${offsetY}px`,
+    'padding-bottom': `${offsetY}px`,
+    'padding-left': `${offsetX}px`,
+    'padding-right': `${offsetX}px`,
   }
   return style
 })
@@ -96,7 +98,7 @@ const StyleScreenAdapterInner = computed(() => {
   let style = {
     width: `${width}px`,
     height: `${height}px`,
-    transform: `scale(${Scale.value})`
+    transform: `scale(${Scale.value})`,
   }
   return style
 })
@@ -113,6 +115,7 @@ const StyleScreenAdapterInner = computed(() => {
 .screen-adapter-outer {
   position: relative;
   height: 100%;
+  box-sizing: border-box;
 }
 .screen-adapter-inner {
   height: 100%;
