@@ -43,20 +43,19 @@ const props = defineProps({
     type: [Number],
     default: () => 1620
   },
-  // 自动校准比例
-  autoRatio: {
-    type: [Boolean],
-    default: () => true
-  },
   // 最大宽高比 在基数内自动校准宽度 以达到充满两边
   maxAspectRatio: {
     type: [Number],
     default: () => 4
   },
-  // 滚动容器 默认关闭 开启时不缩放 但是可以左右滚动
-  scrollView: {
-    type: [Boolean],
-    default: () => false
+  // 模式 纵横比缩放
+  // none 关闭时会开启滚动条
+  // aspectFit 宽度高度自适应缩放到完整显示
+  // widthFix 宽度铺满，高度自动变化
+  // heightFix 高度铺满，宽度自动变化
+  mode: {
+    type: [String],
+    default: () => 'aspectFit'
   },
   // 背景
   bg: {

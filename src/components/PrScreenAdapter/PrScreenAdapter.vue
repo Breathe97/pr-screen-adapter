@@ -1,6 +1,6 @@
 <!-- 屏幕适配组件 参数fixedWidth设计稿宽度 fixedHeight设计稿高度-->
 <template>
-  <div ref="screenAdapterRef" class="screen-adapter" :class="[{ 'overflow-scroll': scrollView }]" :style="[{ 'background-color': bg }]">
+  <div ref="screenAdapterRef" class="screen-adapter" :style="[StyleScreenAdapter]">
     <div class="screen-adapter-outer" :style="[StyleScreenAdapterOuter]">
       <div class="screen-adapter-inner" :style="[StyleScreenAdapterInner]">
         <div class="screen-adapter-inner-content">
@@ -26,20 +26,19 @@ const props = defineProps({
     type: [Number],
     default: () => 1620
   },
-  // 自动校准比例
-  autoRatio: {
-    type: [Boolean],
-    default: () => true
-  },
   // 最大宽高比 在基数内自动校准宽度 以达到充满两边
   maxAspectRatio: {
     type: [Number],
     default: () => 4
   },
-  // 滚动容器 默认关闭 开启时不缩放 但是可以左右滚动
-  scrollView: {
-    type: [Boolean],
-    default: () => false
+  // 模式 纵横比缩放
+  // none 关闭时会开启滚动条
+  // aspectFit 宽度高度自适应缩放到完整显示
+  // widthFix 宽度铺满，高度自动变化
+  // heightFix 高度铺满，宽度自动变化
+  mode: {
+    type: [String],
+    default: () => 'aspectFit'
   },
   // 背景
   bg: {
@@ -55,7 +54,8 @@ const options = ref({
   width: 0, // 真实宽度
   height: 0, // 真实高度
   innerWidth: 0, // 当前屏幕宽度
-  innerHeight: 0 // 当前屏幕高度
+  innerHeight: 0, // 当前屏幕高度
+  scale: 1 // 缩放
 })
 
 // 初始化屏幕参数
@@ -63,15 +63,40 @@ const initOptions = () => {
   let dom = screenAdapterRef.value
   const innerWidth = dom.innerWidth || dom.clientWidth
   const innerHeight = dom.innerHeight || dom.clientHeight
-  let { width, height, maxAspectRatio, autoRatio } = props
-  const ratio = width / height
-  let _ratio = innerWidth / innerHeight
-  _ratio = Math.min(_ratio, maxAspectRatio)
-  // 适配宽度
-  if (autoRatio && ratio < _ratio) {
-    width = (width / ratio) * _ratio
+  let { width, height, maxAspectRatio, mode } = props
+  // 计算缩放值
+  let scale = 1
+  switch (mode) {
+    // 宽高自适应
+    case 'aspectFit': {
+      const ratio = width / height // 真实缩放比例
+      const _ratio = Math.min(innerWidth / innerHeight, maxAspectRatio) // 计算自适应最佳缩放比例
+      // 校准宽度
+      if (ratio < _ratio) {
+        width = (width / ratio) * _ratio
+      }
+      // 计算缩放值
+      const scaleX = innerWidth / width
+      const scaleY = innerHeight / height
+      // 根据屏幕宽高 取最小缩放比例
+      scale = Math.min(scaleX, scaleY)
+      break
+    }
+    // 宽度不变 高度自适应
+    case 'widthFix': {
+      // 计算缩放值
+      scale = innerWidth / width
+      break
+    }
+    // 高度不变 宽度自适应
+    case 'heightFix': {
+      // 计算缩放值
+      scale = innerHeight / height
+      break
+    }
   }
-  options.value = { ...options.value, width, height, innerWidth, innerHeight }
+
+  options.value = { ...options.value, width, height, innerWidth, innerHeight, scale }
   // console.log('\x1b[38;2;0;151;255m%c%s\x1b[0m', 'color:#0097ff;padding:16px 0;', `------->Breathe:options.value`, options.value)
 }
 
@@ -84,25 +109,32 @@ onMounted(() => {
   createObserver()
 })
 
-// 计算缩放
-const Scale = computed(() => {
-  const { width, innerWidth, height, innerHeight } = options.value
-  if (!innerWidth) return 1
-  const scaleX = innerWidth / width
-  const scaleY = innerHeight / height
-  // 根据屏幕宽高 取最小缩放比例
-  let scale = Math.min(scaleX, scaleY)
-  return props.scrollView ? 1 : scale
+// 容器样式
+const StyleScreenAdapter = computed(() => {
+  const { bg, mode } = props
+  let style = { 'background-color': bg }
+  switch (mode) {
+    case 'none':
+      style['overflow'] = 'auto'
+      break
+    case 'widthFix':
+      style['overflow-y'] = 'auto'
+      break
+    case 'heightFix':
+      style['overflow-x'] = 'auto'
+      break
+  }
+  return style
 })
 
 // 外部容器样式
 const StyleScreenAdapterOuter = computed(() => {
-  const { width, innerWidth, height, innerHeight } = options.value
+  const { width, innerWidth, height, innerHeight, scale } = options.value
   // 计算距离上边距离
-  let offsetY = (innerHeight - height * Scale.value) * 0.5
+  let offsetY = (innerHeight - height * scale) * 0.5
   offsetY = Math.max(0, offsetY)
   // 计算距离左边距离
-  let offsetX = (innerWidth - width * Scale.value) * 0.5
+  let offsetX = (innerWidth - width * scale) * 0.5
   offsetX = Math.max(0, offsetX)
   let style = {
     'padding-top': `${offsetY}px`,
@@ -115,11 +147,11 @@ const StyleScreenAdapterOuter = computed(() => {
 
 // 内部容器样式
 const StyleScreenAdapterInner = computed(() => {
-  const { width, height } = options.value
+  const { width, height, scale } = options.value
   let style = {
     width: `${width}px`,
     height: `${height}px`,
-    transform: `scale(${Scale.value})`
+    transform: `scale(${scale})`
   }
   return style
 })
@@ -146,9 +178,5 @@ const StyleScreenAdapterInner = computed(() => {
   height: 100%;
   transform-origin: center center;
   overflow: hidden;
-}
-
-.overflow-scroll {
-  overflow: scroll;
 }
 </style>
