@@ -1,6 +1,6 @@
 <!-- 屏幕适配组件 参数fixedWidth设计稿宽度 fixedHeight设计稿高度-->
 <template>
-  <div ref="screenAdapterRef" class="screen-adapter" :class="[{ 'overflow-hide': overflowHidden }]" :style="[{ 'background-color': bg }]">
+  <div ref="screenAdapterRef" class="screen-adapter" :class="[{ 'overflow-scroll': scrollView }]" :style="[{ 'background-color': bg }]">
     <div class="screen-adapter-outer" :style="[StyleScreenAdapterOuter]">
       <div class="screen-adapter-inner" :style="[StyleScreenAdapterInner]">
         <div class="screen-adapter-inner-content">
@@ -36,10 +36,10 @@ const props = defineProps({
     type: [Number],
     default: () => 4
   },
-  // 超出隐藏 默认开启 关闭时不缩放 但是可以左右滚动
-  overflowHidden: {
+  // 滚动容器 默认关闭 开启时不缩放 但是可以左右滚动
+  scrollView: {
     type: [Boolean],
-    default: () => true
+    default: () => false
   },
   // 背景
   bg: {
@@ -92,7 +92,7 @@ const Scale = computed(() => {
   const scaleY = innerHeight / height
   // 根据屏幕宽高 取最小缩放比例
   let scale = Math.min(scaleX, scaleY)
-  return props.overflowHidden ? scale : 1
+  return props.scrollView ? 1 : scale
 })
 
 // 外部容器样式
@@ -130,7 +130,7 @@ const StyleScreenAdapterInner = computed(() => {
   position: relative;
   width: 100%;
   height: 100%;
-  overflow: auto;
+  overflow: hidden;
 }
 .screen-adapter-outer {
   position: relative;
@@ -148,7 +148,7 @@ const StyleScreenAdapterInner = computed(() => {
   overflow: hidden;
 }
 
-.overflow-hide {
-  overflow: hidden;
+.overflow-scroll {
+  overflow: scroll;
 }
 </style>
