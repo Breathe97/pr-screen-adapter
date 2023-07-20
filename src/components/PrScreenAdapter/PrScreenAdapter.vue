@@ -12,7 +12,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import type { Ref } from 'vue'
 
 const props = defineProps({
@@ -44,6 +44,11 @@ const props = defineProps({
   bg: {
     type: [String],
     default: () => 'rgba(5, 21, 39, 0.9)'
+  },
+  // 布局同步 （当外层修改 width height mode 时 会重新加载内部布局和缩放）
+  layoutSync: {
+    type: [Boolean],
+    default: () => false
   }
 })
 
@@ -112,7 +117,7 @@ onMounted(() => {
 // 容器样式
 const StyleScreenAdapter = computed(() => {
   const { bg, mode } = props
-  let style = { 'background-color': bg }
+  let style: any = { 'background-color': bg }
   switch (mode) {
     case 'none':
       style['overflow'] = 'auto'
@@ -155,6 +160,15 @@ const StyleScreenAdapterInner = computed(() => {
   }
   return style
 })
+
+if (props.layoutSync) {
+  watch(
+    () => `${props.width}-${props.height}-${props.mode}`,
+    () => {
+      initOptions()
+    }
+  )
+}
 </script>
 
 <style scoped>
