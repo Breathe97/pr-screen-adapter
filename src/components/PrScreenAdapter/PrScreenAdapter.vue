@@ -12,7 +12,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
 import type { Ref } from 'vue'
 
 const props = defineProps({
@@ -105,13 +105,18 @@ const initOptions = () => {
   // console.log('\x1b[38;2;0;151;255m%c%s\x1b[0m', 'color:#0097ff;padding:16px 0;', `------->Breathe:options.value`, options.value)
 }
 
+let observer: ResizeObserver
 // 创建dom监听
 const createObserver = () => {
-  let observer = new ResizeObserver(initOptions)
+  observer = new ResizeObserver(initOptions)
   observer.observe(screenAdapterRef.value, { box: 'border-box' })
 }
 onMounted(() => {
   createObserver()
+})
+
+onBeforeUnmount(() => {
+  observer.disconnect()
 })
 
 // 容器样式
