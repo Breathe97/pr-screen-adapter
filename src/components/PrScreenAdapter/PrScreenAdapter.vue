@@ -15,6 +15,8 @@
 import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
 import type { Ref } from 'vue'
 
+const emit = defineEmits(['change'])
+
 const props = defineProps({
   // 期望宽度
   width: {
@@ -100,8 +102,8 @@ const initOptions = () => {
       break
     }
   }
-
   options.value = { ...options.value, width, height, innerWidth, innerHeight, scale }
+  emit('change', options.value)
   // console.log('\x1b[38;2;0;151;255m%c%s\x1b[0m', 'color:#0097ff;padding:16px 0;', `------->Breathe:options.value`, options.value)
 }
 
