@@ -18,8 +18,8 @@ import type { Ref } from 'vue'
 const emit = defineEmits(['change'])
 
 const props = defineProps({
-  // 期望宽度
-  width: {
+ // 期望宽度
+ width: {
     type: [Number],
     default: () => 5760
   },
@@ -28,14 +28,14 @@ const props = defineProps({
     type: [Number],
     default: () => 1620
   },
-  // 最大宽高比 在基数内自动校准宽度 以达到充满两边
+  // 最大宽高比 在当前比值内自动校准宽度 以达到充满两边适配宽屏
   maxAspectRatio: {
     type: [Number],
     default: () => 4
   },
   // 模式 纵横比缩放
-  // none 关闭时会开启滚动条
-  // aspectFit 宽度高度自适应缩放到完整显示
+  // none 关闭时会开启滚动条 (一般本地开发可能会用到，比如台式、笔记本不能缩放页面时)
+  // aspectFit 全屏适应，宽度高度自适应缩放到完整显示
   // widthFix 宽度铺满，高度自动变化
   // heightFix 高度铺满，宽度自动变化
   mode: {
@@ -62,7 +62,7 @@ const options = ref({
   height: 0, // 真实高度
   innerWidth: 0, // 当前屏幕宽度
   innerHeight: 0, // 当前屏幕高度
-  scale: 1 // 缩放
+  scale: 1, // 缩放
 })
 
 // 初始化屏幕参数
@@ -76,7 +76,7 @@ const initOptions = () => {
   switch (mode) {
     // 宽高自适应
     case 'aspectFit': {
-      const ratio = width / height // 真实缩放比例
+      const ratio = width / height // 正常渲染时真实缩放比例
       const _ratio = Math.min(innerWidth / innerHeight, maxAspectRatio) // 计算自适应最佳缩放比例
       // 校准宽度
       if (ratio < _ratio) {
@@ -152,7 +152,7 @@ const StyleScreenAdapterOuter = computed(() => {
     'padding-top': `${offsetY}px`,
     'padding-bottom': `${offsetY}px`,
     'padding-left': `${offsetX}px`,
-    'padding-right': `${offsetX}px`
+    'padding-right': `${offsetX}px`,
   }
   return style
 })
@@ -163,14 +163,14 @@ const StyleScreenAdapterInner = computed(() => {
   let style = {
     width: `${width}px`,
     height: `${height}px`,
-    transform: `scale(${scale})`
+    transform: `scale(${scale})`,
   }
   return style
 })
 
 if (props.layoutSync) {
   watch(
-    () => `${props.width}-${props.height}-${props.mode}`,
+    () => `${props.width}-${props.height}-${props.mode}-${props.maxAspectRatio}`,
     () => {
       initOptions()
     }
