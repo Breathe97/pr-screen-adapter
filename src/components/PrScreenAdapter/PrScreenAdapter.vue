@@ -184,6 +184,7 @@ if (props.layoutSync) {
   width: 100%;
   height: 100%;
   overflow: hidden;
+  transition: background 500ms ease-out;
 }
 .screen-adapter-outer {
   position: relative;
