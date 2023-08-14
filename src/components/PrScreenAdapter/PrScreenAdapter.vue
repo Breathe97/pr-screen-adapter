@@ -1,6 +1,9 @@
 <!-- 屏幕适配组件 参数fixedWidth设计稿宽度 fixedHeight设计稿高度-->
 <template>
   <div ref="screenAdapterRef" class="screen-adapter" :style="[StyleScreenAdapter]">
+    <div class="tips">
+      <div class="tips-quickZoom backdrop-filter" :class="[{ 'tips-quickZoom-show': tipsQuickZoom }]">缩放 : {{ Math.floor(options.wheelScale * 100) }}%</div>
+    </div>
     <div class="screen-adapter-outer" :style="[StyleScreenAdapterOuter]">
       <div class="screen-adapter-inner" :style="[StyleScreenAdapterInner]">
         <div class="screen-adapter-inner-content" :style="[StyleScreenAdapterInnerContent]">
@@ -23,17 +26,17 @@ const props = defineProps({
   // 期望宽度
   width: {
     type: [Number],
-    default: () => 5760,
+    default: () => 5760
   },
   // 期望高度
   height: {
     type: [Number],
-    default: () => 1620,
+    default: () => 1620
   },
   // 最大宽高比 在当前比值内自动校准宽度 以达到充满两边适配宽屏
   maxAspectRatio: {
     type: [Number],
-    default: () => 4,
+    default: () => 4
   },
   // 模式 纵横比缩放
   // none 关闭时会开启滚动条 (一般本地开发可能会用到，比如台式、笔记本不能缩放页面时)
@@ -42,26 +45,28 @@ const props = defineProps({
   // heightFix 高度铺满，宽度自动变化
   mode: {
     type: [String],
-    default: () => 'aspectFit',
+    default: () => 'aspectFit'
   },
   // 背景
   bg: {
     type: [String],
-    default: () => 'rgba(5, 21, 39, 0.9)',
+    default: () => 'rgba(5, 21, 39, 0.9)'
   },
   // 布局同步 （当外层修改 width height mode 时 会重新加载内部布局和缩放）
   layoutSync: {
     type: [Boolean],
-    default: () => false,
+    default: () => false
   },
   // 快捷缩放 Shift + 鼠标滚轮
   quickZoom: {
     type: [Boolean],
-    default: () => false,
-  },
+    default: () => false
+  }
 })
 
 const screenAdapterRef: Ref = ref()
+
+const tipsQuickZoom = ref(false)
 
 // 要用到的一些参数
 const options = ref({
@@ -74,7 +79,7 @@ const options = ref({
   scaleY: 1, // 缩放
   wheelScale: 1, // 鼠标缩放
   mouseClientX: 0, // 快捷缩放时 鼠标的位置
-  mouseClientY: 0, // 快捷缩放时 鼠标的位置
+  mouseClientY: 0 // 快捷缩放时 鼠标的位置
 })
 
 // 初始化屏幕参数
@@ -152,7 +157,7 @@ const StyleScreenAdapterOuter = computed(() => {
     'padding-top': `${offsetY}px`,
     'padding-bottom': `${offsetY}px`,
     'padding-left': `${offsetX}px`,
-    'padding-right': `${offsetX}px`,
+    'padding-right': `${offsetX}px`
   }
   return style
 })
@@ -163,7 +168,7 @@ const StyleScreenAdapterInner = computed(() => {
   let style = {
     width: `${width}px`,
     height: `${height}px`,
-    transform: `scale(${scale})`,
+    transform: `scale(${scale})`
   }
   return style
 })
@@ -175,7 +180,7 @@ const StyleScreenAdapterInnerContent = computed(() => {
   if (mouseClientX && mouseClientY) {
     style = {
       transform: `scale(${wheelScale})`,
-      'transform-origin': `${mouseClientX}px ${mouseClientY}px`,
+      'transform-origin': `${mouseClientX}px ${mouseClientY}px`
     }
   }
   // console.log('\x1b[38;2;0;151;255m%c%s\x1b[0m', 'color:#0097ff;padding:16px 0;', `------->Breathe:style`, style)
@@ -183,7 +188,7 @@ const StyleScreenAdapterInnerContent = computed(() => {
 })
 
 let observer: ResizeObserver
-
+let timer: any = 0
 onMounted(() => {
   // 实时校准布局
   if (props.layoutSync) {
@@ -202,18 +207,33 @@ onMounted(() => {
   }
   // 注册鼠标快捷缩放事件
   if (props.quickZoom) {
+    const mousemove = (e: any) => {
+      let isActive = e.getModifierState('Shift')
+      // 按下Shift才生效
+      if (isActive) {
+        // 获取当前鼠标在浏览器的位置
+        const { clientX, clientY } = e
+        let info = screenAdapterRef.value.getBoundingClientRect()
+        // 获取当前容器的位置
+        const { x, y } = info
+        let mouseClientX = (clientX - x) / options.value.scaleX
+        let mouseClientY = (clientY - y) / options.value.scaleY
+        options.value.mouseClientX = mouseClientX
+        options.value.mouseClientY = mouseClientY
+      }
+    }
+    screenAdapterRef.value.onmousemove = mousemove
+
     const mousewheel = (e: any) => {
-      // 获取当前鼠标在浏览器的位置
-      const { clientX, clientY } = e
-      let info = screenAdapterRef.value.getBoundingClientRect()
-      // 获取当前容器的位置
-      const { x, y } = info
-      let mouseClientX = (clientX - x) / options.value.scaleX
-      let mouseClientY = (clientY - y) / options.value.scaleY
-      options.value.mouseClientX = mouseClientX
-      options.value.mouseClientY = mouseClientY
+      // console.log('\x1b[38;2;0;151;255m%c%s\x1b[0m', 'color:#0097ff;padding:16px 0;', `------->Breathe:`, e)
+      // 按下Shift才生效
       let isActive = e.getModifierState('Shift')
       if (isActive) {
+        tipsQuickZoom.value = true
+        if (timer) clearTimeout(timer)
+        timer = setTimeout(() => {
+          tipsQuickZoom.value = false
+        }, 1000)
         let wheelScale = options.value.wheelScale + (e.wheelDeltaY > 0 ? 0.1 : -0.1)
         wheelScale = Number(wheelScale.toFixed(1))
         if (wheelScale < 1) {
@@ -262,5 +282,37 @@ onBeforeUnmount(() => {
 .screen-adapter-content-view {
   position: relative;
   height: 100%;
+}
+.tips {
+  position: absolute;
+  left: 0;
+  top: 0;
+  pointer-events: none;
+  width: 100%;
+  height: 100%;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.backdrop-filter {
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+}
+.tips-quickZoom {
+  width: 180px;
+  height: 60px;
+  font-size: 20px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(0, 0, 0, 0.3);
+  opacity: 0;
+  line-height: 1;
+  transition: all 230ms ease-out;
+}
+.tips-quickZoom-show {
+  opacity: 1;
 }
 </style>
