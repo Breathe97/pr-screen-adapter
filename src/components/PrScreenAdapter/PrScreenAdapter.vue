@@ -26,17 +26,17 @@ const props = defineProps({
   // 期望宽度
   width: {
     type: [Number],
-    default: () => 5760
+    default: () => 5760,
   },
   // 期望高度
   height: {
     type: [Number],
-    default: () => 1620
+    default: () => 1620,
   },
   // 最大宽高比 在当前比值内自动校准宽度 以达到充满两边适配宽屏
   maxAspectRatio: {
     type: [Number],
-    default: () => 4
+    default: () => 4,
   },
   // 模式 纵横比缩放
   // none 关闭时会开启滚动条 (一般本地开发可能会用到，比如台式、笔记本不能缩放页面时)
@@ -45,23 +45,23 @@ const props = defineProps({
   // heightFix 高度铺满，宽度自动变化
   mode: {
     type: [String],
-    default: () => 'aspectFit'
+    default: () => 'aspectFit',
   },
   // 背景
   bg: {
     type: [String],
-    default: () => 'rgba(5, 21, 39, 0.9)'
+    default: () => 'rgba(5, 21, 39, 0.9)',
   },
   // 布局同步 （当外层修改 width height mode 时 会重新加载内部布局和缩放）
   layoutSync: {
     type: [Boolean],
-    default: () => false
+    default: () => false,
   },
   // 快捷缩放 Shift + 鼠标滚轮
   quickZoom: {
     type: [Boolean],
-    default: () => false
-  }
+    default: () => false,
+  },
 })
 
 const screenAdapterRef: Ref = ref()
@@ -79,7 +79,7 @@ const options = ref({
   scaleY: 1, // 缩放
   wheelScale: 1, // 鼠标缩放
   mouseClientX: 0, // 快捷缩放时 鼠标的位置
-  mouseClientY: 0 // 快捷缩放时 鼠标的位置
+  mouseClientY: 0, // 快捷缩放时 鼠标的位置
 })
 
 // 初始化屏幕参数
@@ -157,7 +157,7 @@ const StyleScreenAdapterOuter = computed(() => {
     'padding-top': `${offsetY}px`,
     'padding-bottom': `${offsetY}px`,
     'padding-left': `${offsetX}px`,
-    'padding-right': `${offsetX}px`
+    'padding-right': `${offsetX}px`,
   }
   return style
 })
@@ -168,7 +168,7 @@ const StyleScreenAdapterInner = computed(() => {
   let style = {
     width: `${width}px`,
     height: `${height}px`,
-    transform: `scale(${scale})`
+    transform: `scale(${scale})`,
   }
   return style
 })
@@ -177,11 +177,9 @@ const StyleScreenAdapterInner = computed(() => {
 const StyleScreenAdapterInnerContent = computed(() => {
   const { wheelScale, mouseClientX, mouseClientY } = options.value
   let style = {}
-  if (mouseClientX && mouseClientY) {
-    style = {
-      transform: `scale(${wheelScale})`,
-      'transform-origin': `${mouseClientX}px ${mouseClientY}px`
-    }
+  style = {
+    transform: `scale(${wheelScale})`,
+    'transform-origin': `${mouseClientX}px ${mouseClientY}px`,
   }
   // console.log('\x1b[38;2;0;151;255m%c%s\x1b[0m', 'color:#0097ff;padding:16px 0;', `------->Breathe:style`, style)
   return style
@@ -277,7 +275,7 @@ onBeforeUnmount(() => {
   height: 100%;
   transform-origin: center center;
   overflow: hidden;
-  transition: all 230ms ease-out;
+  transition: all 500ms ease-out;
 }
 .screen-adapter-content-view {
   position: relative;
