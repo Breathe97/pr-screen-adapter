@@ -66,6 +66,11 @@ const props = defineProps({
   layoutSync: {
     type: [Boolean],
     default: () => false
+  },
+  // 快捷缩放 Shift + 鼠标滚轮
+  quickZoom: {
+    type: [Boolean],
+    default: () => false
   }
 })
 ```
