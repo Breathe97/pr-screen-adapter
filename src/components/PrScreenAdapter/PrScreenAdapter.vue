@@ -7,6 +7,7 @@
     <div class="screen-adapter-outer" :style="[StyleScreenAdapterOuter]">
       <div class="screen-adapter-inner" :style="[StyleScreenAdapterInner]">
         <div class="screen-adapter-inner-content" :style="[StyleScreenAdapterInnerContent]" :class="{ 'will-change': quickZoom }">
+          <div class="event-mask" :class="[{ 'event-mask-active': quickZoomActive }]"></div>
           <div class="screen-adapter-content-view">
             <slot />
           </div>
@@ -18,7 +19,7 @@
 
 <script lang="ts" setup>
 import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
-import type { Ref } from 'vue'
+import type { Ref, PropType } from 'vue'
 
 const emit = defineEmits(['change'])
 
@@ -26,17 +27,17 @@ const props = defineProps({
   // 期望宽度
   width: {
     type: [Number],
-    default: () => 5760,
+    default: () => 5760
   },
   // 期望高度
   height: {
     type: [Number],
-    default: () => 1620,
+    default: () => 1620
   },
   // 最大宽高比 在当前比值内自动校准宽度 以达到充满两边适配宽屏
   maxAspectRatio: {
     type: [Number],
-    default: () => 4,
+    default: () => 4
   },
   // 模式 纵横比缩放
   // none 关闭时会开启滚动条 (一般本地开发可能会用到，比如台式、笔记本不能缩放页面时)
@@ -45,28 +46,39 @@ const props = defineProps({
   // heightFix 高度铺满，宽度自动变化
   mode: {
     type: [String],
-    default: () => 'aspectFit',
+    default: () => 'aspectFit'
   },
   // 背景
   bg: {
     type: [String],
-    default: () => 'rgba(5, 21, 39, 0.9)',
+    default: () => 'rgba(5, 21, 39, 0.9)'
   },
   // 布局同步 （当外层修改 width height mode 时 会重新加载内部布局和缩放）
   layoutSync: {
     type: [Boolean],
-    default: () => false,
+    default: () => false
   },
-  // 快捷缩放 Shift + 鼠标滚轮
+  // 快捷缩放 功能键 + 鼠标滚轮
   quickZoom: {
     type: [Boolean],
-    default: () => false,
+    default: () => false
   },
+  // 快捷键
+  quickKey: {
+    type: String as PropType<'Shift' | 'Alt'>,
+    default: () => 'Alt'
+  },
+  // 鼠标滚轮事件 默认关闭 在触发快捷功能时会强行关闭
+  mouseEvent: {
+    type: [Boolean],
+    default: () => false
+  }
 })
 
 const screenAdapterRef: Ref = ref()
 
 const tipsQuickZoom = ref(false)
+const quickZoomActive = ref(false)
 
 // 要用到的一些参数
 const options = ref({
@@ -79,7 +91,7 @@ const options = ref({
   scaleY: 1, // 缩放
   wheelScale: 1, // 鼠标缩放
   mouseClientX: 0, // 快捷缩放时 鼠标的位置
-  mouseClientY: 0, // 快捷缩放时 鼠标的位置
+  mouseClientY: 0 // 快捷缩放时 鼠标的位置
 })
 
 // 初始化屏幕参数
@@ -157,7 +169,7 @@ const StyleScreenAdapterOuter = computed(() => {
     'padding-top': `${offsetY}px`,
     'padding-bottom': `${offsetY}px`,
     'padding-left': `${offsetX}px`,
-    'padding-right': `${offsetX}px`,
+    'padding-right': `${offsetX}px`
   }
   return style
 })
@@ -168,7 +180,7 @@ const StyleScreenAdapterInner = computed(() => {
   let style = {
     width: `${width}px`,
     height: `${height}px`,
-    transform: `scale(${scale})`,
+    transform: `scale(${scale})`
   }
   return style
 })
@@ -179,7 +191,7 @@ const StyleScreenAdapterInnerContent = computed(() => {
   let style = {}
   style = {
     transform: `scale(${wheelScale})`,
-    'transform-origin': `${mouseClientX}px ${mouseClientY}px`,
+    'transform-origin': `${mouseClientX}px ${mouseClientY}px`
   }
   // console.log('\x1b[38;2;0;151;255m%c%s\x1b[0m', 'color:#0097ff;padding:16px 0;', `------->Breathe:style`, style)
   return style
@@ -206,7 +218,7 @@ onMounted(() => {
   // 注册鼠标快捷缩放事件
   if (props.quickZoom) {
     const mousemove = (e: any) => {
-      let isActive = e.getModifierState('Shift')
+      let isActive = e.getModifierState(props.quickKey)
       // 按下Shift才生效
       if (isActive) {
         // 获取当前鼠标在浏览器的位置
@@ -219,13 +231,17 @@ onMounted(() => {
         options.value.mouseClientX = mouseClientX
         options.value.mouseClientY = mouseClientY
       }
+      quickZoomActive.value = isActive
     }
     screenAdapterRef.value.onmousemove = mousemove
 
     const mousewheel = (e: any) => {
       // console.log('\x1b[38;2;0;151;255m%c%s\x1b[0m', 'color:#0097ff;padding:16px 0;', `------->Breathe:`, e)
-      // 按下Shift才生效
-      let isActive = e.getModifierState('Shift')
+      // 按下功能键才生效
+      const isActive = e.getModifierState(props.quickKey)
+      if (props.mouseEvent === false || isActive) {
+        e.preventDefault()
+      }
       if (isActive) {
         tipsQuickZoom.value = true
         if (timer) clearTimeout(timer)
@@ -276,22 +292,40 @@ onBeforeUnmount(() => {
   transform-origin: center center;
   overflow: hidden;
   transition: all 500ms ease-out;
+  pointer-events: none;
 }
+.event-mask {
+  position: absolute;
+  left: 0;
+  height: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  background-color: rgba(0, 151, 255, 0.7);
+  opacity: 0;
+  z-index: 2;
+}
+.event-mask-active {
+  pointer-events: all;
+  /* opacity: 1; */
+}
+
 .will-change {
   will-change: transform;
 }
 .screen-adapter-content-view {
   position: relative;
   height: 100%;
+  z-index: 1;
 }
 .tips {
-  position: absolute;
+  position: fixed;
   left: 0;
   top: 0;
-  pointer-events: none;
   width: 100%;
   height: 100%;
   z-index: 9999;
+  pointer-events: none;
   display: flex;
   align-items: center;
   justify-content: center;

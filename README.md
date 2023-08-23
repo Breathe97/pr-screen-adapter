@@ -67,8 +67,18 @@ const props = defineProps({
     type: [Boolean],
     default: () => false
   },
-  // 快捷缩放 Shift + 鼠标滚轮
+  // 快捷缩放 功能键 + 鼠标滚轮
   quickZoom: {
+    type: [Boolean],
+    default: () => false
+  },
+  // 快捷键
+  quickKey: {
+    type: String as PropType<'Shift' | 'Alt'>,
+    default: () => 'Alt'
+  },
+  // 鼠标滚轮事件 默认关闭 在触发快捷功能时会强行关闭
+  mouseEvent: {
     type: [Boolean],
     default: () => false
   }
