@@ -6,7 +6,7 @@
     </div>
     <div class="screen-adapter-outer" :style="[StyleScreenAdapterOuter]">
       <div class="screen-adapter-inner" :style="[StyleScreenAdapterInner]">
-        <div class="screen-adapter-inner-content" :style="[StyleScreenAdapterInnerContent]">
+        <div class="screen-adapter-inner-content" :style="[StyleScreenAdapterInnerContent]" :class="{ 'will-change': quickZoom }">
           <div class="screen-adapter-content-view">
             <slot />
           </div>
@@ -276,6 +276,9 @@ onBeforeUnmount(() => {
   transform-origin: center center;
   overflow: hidden;
   transition: all 500ms ease-out;
+}
+.will-change {
+  will-change: transform;
 }
 .screen-adapter-content-view {
   position: relative;
