@@ -8,7 +8,7 @@
       <div class="screen-adapter-inner" :style="[StyleScreenAdapterInner]">
         <div class="screen-adapter-inner-content" :style="[StyleScreenAdapterInnerContent]" :class="{ 'will-change': quickZoom }">
           <div class="event-mask" :class="[{ 'event-mask-active': quickZoomActive }]"></div>
-          <div class="screen-adapter-content-view">
+          <div class="screen-adapter-content-view" :style="[StyleScreenAdapterContentView]">
             <slot />
           </div>
         </div>
@@ -197,6 +197,16 @@ const StyleScreenAdapterInnerContent = computed(() => {
   return style
 })
 
+// 真实容器样式
+const StyleScreenAdapterContentView = computed(() => {
+  const { width, height } = options.value
+  let style = {
+    width: `${width}px`,
+    height: `${height}px`,
+  }
+  return style
+})
+
 let observer: ResizeObserver
 let timer: any = 0
 onMounted(() => {
@@ -316,6 +326,7 @@ onBeforeUnmount(() => {
 }
 .screen-adapter-content-view {
   position: relative;
+  width: 100%;
   height: 100%;
   z-index: 1;
 }

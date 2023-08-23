@@ -1,6 +1,6 @@
 {
   "name": "pr-screen-adapter",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "description": "基于vue3 封装的一个基于外部容器自适应缩放的组件。",
   "type": "module",
   "main": "./src/components/PrScreenAdapter/index.js",
