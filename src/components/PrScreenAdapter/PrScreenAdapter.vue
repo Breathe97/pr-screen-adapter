@@ -1,8 +1,7 @@
-<!-- 屏幕适配组件 参数fixedWidth设计稿宽度 fixedHeight设计稿高度-->
 <template>
   <div ref="screenAdapterRef" class="screen-adapter" :style="[StyleScreenAdapter]">
-    <div class="tips">
-      <div class="tips-quickZoom backdrop-filter" :class="[{ 'tips-quickZoom-show': tipsQuickZoom }]">缩放 : {{ Math.floor(options.wheelScale * 100) }}%</div>
+    <div class="screen-adapter-tips">
+      <div class="screen-adapter-tips-quickZoom backdrop-filter" :class="[{ 'screen-adapter-tips-quickZoom-show': tipsQuickZoom }]">缩放 : {{ Math.floor(options.wheelScale * 100) }}%</div>
     </div>
     <div class="screen-adapter-outer" :style="[StyleScreenAdapterOuter]">
       <div class="screen-adapter-inner" :style="[StyleScreenAdapterInner]">
@@ -27,17 +26,17 @@ const props = defineProps({
   // 期望宽度
   width: {
     type: [Number],
-    default: () => 5760,
+    default: () => 5760
   },
   // 期望高度
   height: {
     type: [Number],
-    default: () => 1620,
+    default: () => 1620
   },
   // 最大宽高比 在当前比值内自动校准宽度 以达到充满两边适配宽屏
   maxAspectRatio: {
     type: [Number],
-    default: () => 4,
+    default: () => 4
   },
   // 模式 纵横比缩放
   // none 关闭时会开启滚动条 (一般本地开发可能会用到，比如台式、笔记本不能缩放页面时)
@@ -46,33 +45,33 @@ const props = defineProps({
   // heightFix 高度铺满，宽度自动变化
   mode: {
     type: [String],
-    default: () => 'aspectFit',
+    default: () => 'aspectFit'
   },
   // 背景
   bg: {
     type: [String],
-    default: () => 'rgba(5, 21, 39, 0.9)',
+    default: () => 'rgba(5, 21, 39, 0.9)'
   },
   // 布局同步 （当外层修改 width height mode 时 会重新加载内部布局和缩放）
   layoutSync: {
     type: [Boolean],
-    default: () => false,
+    default: () => false
   },
   // 快捷缩放 功能键 + 鼠标滚轮
   quickZoom: {
     type: [Boolean],
-    default: () => false,
+    default: () => false
   },
   // 快捷键
   quickKey: {
     type: String as PropType<'Shift' | 'Alt'>,
-    default: () => 'Alt',
+    default: () => 'Alt'
   },
   // 鼠标滚轮事件 默认关闭 在触发快捷功能时会强行关闭
   mouseEvent: {
     type: [Boolean],
-    default: () => false,
-  },
+    default: () => false
+  }
 })
 
 const screenAdapterRef: Ref = ref()
@@ -91,7 +90,7 @@ const options = ref({
   scaleY: 1, // 缩放
   wheelScale: 1, // 鼠标缩放
   mouseClientX: 0, // 快捷缩放时 鼠标的位置
-  mouseClientY: 0, // 快捷缩放时 鼠标的位置
+  mouseClientY: 0 // 快捷缩放时 鼠标的位置
 })
 
 // 初始化屏幕参数
@@ -135,7 +134,7 @@ const initOptions = () => {
   }
   options.value = { ...options.value, width, height, innerWidth, innerHeight, scale, scaleX, scaleY }
   emit('change', options.value)
-  // console.log('\x1b[38;2;0;151;255m%c%s\x1b[0m', 'color:#0097ff;padding:16px 0;', `------->Breathe:options.value`, options.value)
+  console.log('\x1b[38;2;0;151;255m%c%s\x1b[0m', 'color:#0097ff;padding:16px 0;', `------->Breathe:options.value`, options.value)
 }
 
 // 容器样式
@@ -169,7 +168,7 @@ const StyleScreenAdapterOuter = computed(() => {
     'padding-top': `${offsetY}px`,
     'padding-bottom': `${offsetY}px`,
     'padding-left': `${offsetX}px`,
-    'padding-right': `${offsetX}px`,
+    'padding-right': `${offsetX}px`
   }
   return style
 })
@@ -180,7 +179,7 @@ const StyleScreenAdapterInner = computed(() => {
   let style = {
     width: `${width}px`,
     height: `${height}px`,
-    transform: `scale(${scale})`,
+    transform: `scale(${scale})`
   }
   return style
 })
@@ -191,7 +190,7 @@ const StyleScreenAdapterInnerContent = computed(() => {
   let style = {}
   style = {
     transform: `scale(${wheelScale})`,
-    'transform-origin': `${mouseClientX}px ${mouseClientY}px`,
+    'transform-origin': `${mouseClientX}px ${mouseClientY}px`
   }
   // console.log('\x1b[38;2;0;151;255m%c%s\x1b[0m', 'color:#0097ff;padding:16px 0;', `------->Breathe:style`, style)
   return style
@@ -202,7 +201,7 @@ const StyleScreenAdapterContentView = computed(() => {
   const { width, height } = options.value
   let style = {
     width: `${width}px`,
-    height: `${height}px`,
+    height: `${height}px`
   }
   return style
 })
@@ -210,7 +209,7 @@ const StyleScreenAdapterContentView = computed(() => {
 let observer: ResizeObserver
 let timer: any = 0
 onMounted(() => {
-  // 实时校准布局
+  // 实时校准布局 额外添加监听器
   if (props.layoutSync) {
     watch(
       () => `${props.width}-${props.height}-${props.mode}-${props.maxAspectRatio}`,
@@ -224,6 +223,8 @@ onMounted(() => {
       observer.observe(screenAdapterRef.value, { box: 'border-box' })
     }
     createObserver()
+  } else {
+    initOptions() // 仅第一次初始化
   }
   // 注册鼠标快捷缩放事件
   if (props.quickZoom) {
@@ -330,7 +331,7 @@ onBeforeUnmount(() => {
   height: 100%;
   z-index: 1;
 }
-.tips {
+.screen-adapter-tips {
   position: fixed;
   left: 0;
   top: 0;
@@ -346,7 +347,7 @@ onBeforeUnmount(() => {
   backdrop-filter: saturate(180%) blur(20px);
   -webkit-backdrop-filter: saturate(180%) blur(20px);
 }
-.tips-quickZoom {
+.screen-adapter-tips-quickZoom {
   width: 180px;
   height: 60px;
   font-size: 20px;
@@ -359,7 +360,7 @@ onBeforeUnmount(() => {
   line-height: 1;
   transition: all 230ms ease-out;
 }
-.tips-quickZoom-show {
+.screen-adapter-tips-quickZoom-show {
   opacity: 1;
 }
 </style>
