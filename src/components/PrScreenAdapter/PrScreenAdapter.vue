@@ -304,7 +304,6 @@ onBeforeUnmount(() => {
   transform-origin: center center;
   overflow: hidden;
   transition: all 500ms ease-out;
-  pointer-events: none;
 }
 .event-mask {
   position: absolute;
