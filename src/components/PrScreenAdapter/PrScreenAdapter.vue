@@ -70,7 +70,7 @@ const props = defineProps({
   // 鼠标滚轮事件 默认关闭 在触发快捷功能时会强行关闭
   mouseEvent: {
     type: [Boolean],
-    default: () => false
+    default: () => true
   }
 })
 
@@ -134,7 +134,7 @@ const initOptions = () => {
   }
   options.value = { ...options.value, width, height, innerWidth, innerHeight, scale, scaleX, scaleY }
   emit('change', options.value)
-  console.log('\x1b[38;2;0;151;255m%c%s\x1b[0m', 'color:#0097ff;padding:16px 0;', `------->Breathe:options.value`, options.value)
+  // console.log('\x1b[38;2;0;151;255m%c%s\x1b[0m', 'color:#0097ff;padding:16px 0;', `------->Breathe:options.value`, options.value)
 }
 
 // 容器样式
