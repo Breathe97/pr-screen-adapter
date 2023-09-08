@@ -5,7 +5,7 @@
     </div>
     <div class="screen-adapter-outer" :style="[StyleScreenAdapterOuter]">
       <div class="screen-adapter-inner" :style="[StyleScreenAdapterInner]">
-        <div class="screen-adapter-inner-content" :style="[StyleScreenAdapterInnerContent]" :class="{ 'will-change': quickZoom }">
+        <div ref="screenAdapterInnerContentRef" class="screen-adapter-inner-content" :style="[StyleScreenAdapterInnerContent]" :class="{ 'will-change': quickZoom }">
           <div class="event-mask" :class="[{ 'event-mask-active': quickZoomActive }]"></div>
           <div class="screen-adapter-content-view" :style="[StyleScreenAdapterContentView]">
             <slot />
@@ -17,7 +17,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
 import type { Ref, PropType } from 'vue'
 
 const emit = defineEmits(['change'])
@@ -26,17 +26,17 @@ const props = defineProps({
   // 期望宽度
   width: {
     type: [Number],
-    default: () => 5760
+    default: () => 5760,
   },
   // 期望高度
   height: {
     type: [Number],
-    default: () => 1620
+    default: () => 1620,
   },
   // 最大宽高比 在当前比值内自动校准宽度 以达到充满两边适配宽屏
   maxAspectRatio: {
     type: [Number],
-    default: () => 4
+    default: () => 4,
   },
   // 模式 纵横比缩放
   // none 关闭时会开启滚动条 (一般本地开发可能会用到，比如台式、笔记本不能缩放页面时)
@@ -45,56 +45,59 @@ const props = defineProps({
   // heightFix 高度铺满，宽度自动变化
   mode: {
     type: [String],
-    default: () => 'aspectFit'
+    default: () => 'aspectFit',
   },
   // 背景
   bg: {
     type: [String],
-    default: () => 'rgba(5, 21, 39, 0.9)'
+    default: () => 'rgba(5, 21, 39, 0.9)',
   },
   // 布局同步 （当外层修改 width height mode 时 会重新加载内部布局和缩放）
   layoutSync: {
     type: [Boolean],
-    default: () => false
+    default: () => false,
   },
   // 快捷缩放 功能键 + 鼠标滚轮
   quickZoom: {
     type: [Boolean],
-    default: () => false
+    default: () => false,
   },
   // 快捷键
   quickKey: {
     type: String as PropType<'Shift' | 'Alt'>,
-    default: () => 'Alt'
+    default: () => 'Alt',
   },
   // 鼠标滚轮事件 默认关闭 在触发快捷功能时会强行关闭
   mouseEvent: {
     type: [Boolean],
-    default: () => true
-  }
+    default: () => true,
+  },
 })
 
 const screenAdapterRef: Ref = ref()
+const screenAdapterInnerContentRef: Ref = ref()
 
 const tipsQuickZoom = ref(false)
 const quickZoomActive = ref(false)
 
 // 要用到的一些参数
 const options = ref({
+  innerWidth: 0, // 当前容器宽度
+  innerHeight: 0, // 当前容器高度
   width: 0, // 真实宽度
   height: 0, // 真实高度
-  innerWidth: 0, // 当前屏幕宽度
-  innerHeight: 0, // 当前屏幕高度
   scale: 1, // 缩放
   scaleX: 1, // 缩放
   scaleY: 1, // 缩放
   wheelScale: 1, // 鼠标缩放
   mouseClientX: 0, // 快捷缩放时 鼠标的位置
-  mouseClientY: 0 // 快捷缩放时 鼠标的位置
+  mouseClientY: 0, // 快捷缩放时 鼠标的位置
+  offsetX: 0, // 真实视图距离浏览器视口左边轴距离
+  offsetY: 0, // 真实视图距离浏览器视口上边距离
 })
 
 // 初始化屏幕参数
-const initOptions = () => {
+const initOptions = async () => {
   let dom = screenAdapterRef.value
   const innerWidth = dom.innerWidth || dom.clientWidth
   const innerHeight = dom.innerHeight || dom.clientHeight
@@ -132,7 +135,11 @@ const initOptions = () => {
       break
     }
   }
-  options.value = { ...options.value, width, height, innerWidth, innerHeight, scale, scaleX, scaleY }
+  await nextTick()
+  const info = screenAdapterInnerContentRef.value.getBoundingClientRect()
+  const offsetX = info.x
+  const offsetY = info.y
+  options.value = { ...options.value, width, height, innerWidth, innerHeight, scale, scaleX, scaleY, offsetX, offsetY }
   emit('change', options.value)
   // console.log('\x1b[38;2;0;151;255m%c%s\x1b[0m', 'color:#0097ff;padding:16px 0;', `------->Breathe:options.value`, options.value)
 }
@@ -155,7 +162,7 @@ const StyleScreenAdapter = computed(() => {
   return style
 })
 
-// 外部容器样式
+// 第一层 外部容器 添加padding 来保持内部容器始终居中
 const StyleScreenAdapterOuter = computed(() => {
   const { width, innerWidth, height, innerHeight, scale } = options.value
   // 计算距离上边距离
@@ -168,40 +175,40 @@ const StyleScreenAdapterOuter = computed(() => {
     'padding-top': `${offsetY}px`,
     'padding-bottom': `${offsetY}px`,
     'padding-left': `${offsetX}px`,
-    'padding-right': `${offsetX}px`
+    'padding-right': `${offsetX}px`,
   }
   return style
 })
 
-// 内部容器样式
+// 第二层 内部容器 根据外部容器对内部的图片进行自适应缩放（比如使里面的图片始终完整显示）
 const StyleScreenAdapterInner = computed(() => {
   const { width, height, scale } = options.value
   let style = {
     width: `${width}px`,
     height: `${height}px`,
-    transform: `scale(${scale})`
+    transform: `scale(${scale})`,
   }
   return style
 })
 
-// 内部容器样式
+// 第三层 通过鼠标操作对内容容器进行平移缩放（鼠标拖动缩放图片）
 const StyleScreenAdapterInnerContent = computed(() => {
   const { wheelScale, mouseClientX, mouseClientY } = options.value
   let style = {}
   style = {
     transform: `scale(${wheelScale})`,
-    'transform-origin': `${mouseClientX}px ${mouseClientY}px`
+    'transform-origin': `${mouseClientX}px ${mouseClientY}px`,
   }
   // console.log('\x1b[38;2;0;151;255m%c%s\x1b[0m', 'color:#0097ff;padding:16px 0;', `------->Breathe:style`, style)
   return style
 })
 
-// 真实容器样式
+// 第四层 渲染的具体内容容器（可以看作所有内容是一张图片）
 const StyleScreenAdapterContentView = computed(() => {
   const { width, height } = options.value
   let style = {
     width: `${width}px`,
-    height: `${height}px`
+    height: `${height}px`,
   }
   return style
 })
@@ -232,13 +239,12 @@ onMounted(() => {
       let isActive = e.getModifierState(props.quickKey)
       // 按下Shift才生效
       if (isActive) {
-        // 获取当前鼠标在浏览器的位置
+        // 获取当前鼠标在浏览器窗口的位置
         const { clientX, clientY } = e
-        let info = screenAdapterRef.value.getBoundingClientRect()
-        // 获取当前容器的位置
-        const { x, y } = info
-        let mouseClientX = (clientX - x) / options.value.scaleX
-        let mouseClientY = (clientY - y) / options.value.scaleY
+        const { offsetX, offsetY, scale } = options.value
+        // 获取鼠标在当前容器的位置
+        const mouseClientX = (clientX - offsetX) / scale
+        const mouseClientY = (clientY - offsetY) / scale
         options.value.mouseClientX = mouseClientX
         options.value.mouseClientY = mouseClientY
       }
@@ -303,7 +309,9 @@ onBeforeUnmount(() => {
   height: 100%;
   transform-origin: center center;
   overflow: hidden;
-  transition: all 500ms ease-out;
+  transition-timing-function: ease-out;
+  transition-property: all;
+  transition-duration: 500ms;
 }
 .event-mask {
   position: absolute;
@@ -315,6 +323,7 @@ onBeforeUnmount(() => {
   background-color: rgba(0, 151, 255, 0.7);
   opacity: 0;
   z-index: 2;
+  cursor: zoom-in;
 }
 .event-mask-active {
   pointer-events: all;
@@ -331,7 +340,7 @@ onBeforeUnmount(() => {
   z-index: 1;
 }
 .screen-adapter-tips {
-  position: fixed;
+  position: absolute;
   left: 0;
   top: 0;
   width: 100%;
@@ -358,6 +367,7 @@ onBeforeUnmount(() => {
   opacity: 0;
   line-height: 1;
   transition: all 230ms ease-out;
+  color: #ffffff;
 }
 .screen-adapter-tips-quickZoom-show {
   opacity: 1;
