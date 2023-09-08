@@ -233,9 +233,13 @@ onMounted(() => {
   } else {
     initOptions() // 仅第一次初始化
   }
+
   // 注册鼠标快捷缩放事件
   if (props.quickZoom) {
+    // 鼠标移动
     const mousemove = (e: any) => {
+      e.preventDefault()
+      e.stopPropagation()
       let isActive = e.getModifierState(props.quickKey)
       // 按下Shift才生效
       if (isActive) {
@@ -252,12 +256,14 @@ onMounted(() => {
     }
     screenAdapterRef.value.onmousemove = mousemove
 
+    // 滚轮滚动
     const mousewheel = (e: any) => {
       // console.log('\x1b[38;2;0;151;255m%c%s\x1b[0m', 'color:#0097ff;padding:16px 0;', `------->Breathe:`, e)
       // 按下功能键才生效
       const isActive = e.getModifierState(props.quickKey)
       if (props.mouseEvent === false || isActive) {
         e.preventDefault()
+        e.stopPropagation()
       }
       if (isActive) {
         tipsQuickZoom.value = true
@@ -327,7 +333,7 @@ onBeforeUnmount(() => {
 }
 .event-mask-active {
   pointer-events: all;
-  /* opacity: 1; */
+  /* opacity: 0.5; */
 }
 
 .will-change {
@@ -350,6 +356,7 @@ onBeforeUnmount(() => {
   display: flex;
   align-items: center;
   justify-content: center;
+  transform: scale(1);
 }
 .backdrop-filter {
   backdrop-filter: saturate(180%) blur(20px);
