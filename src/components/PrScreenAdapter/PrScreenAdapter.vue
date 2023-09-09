@@ -5,7 +5,7 @@
     </div>
     <div class="screen-adapter-outer" :style="[StyleScreenAdapterOuter]">
       <div class="screen-adapter-inner" :style="[StyleScreenAdapterInner]">
-        <div ref="screenAdapterInnerContentRef" class="screen-adapter-inner-content" :style="[StyleScreenAdapterInnerContent]" :class="{ 'will-change': quickZoom }">
+        <div class="screen-adapter-inner-content" :style="[StyleScreenAdapterInnerContent]" :class="{ 'will-change': quickZoom }">
           <div class="event-mask" :class="[{ 'event-mask-active': quickZoomActive }]"></div>
           <div class="screen-adapter-content-view" :style="[StyleScreenAdapterContentView]">
             <slot />
@@ -75,7 +75,6 @@ const props = defineProps({
 })
 
 const screenAdapterRef: Ref = ref()
-const screenAdapterInnerContentRef: Ref = ref()
 
 const tipsQuickZoom = ref(false)
 const quickZoomActive = ref(false)
@@ -98,9 +97,13 @@ const options = ref({
 
 // 初始化屏幕参数
 const initOptions = async () => {
-  let dom = screenAdapterRef.value
-  const innerWidth = dom.innerWidth || dom.clientWidth
-  const innerHeight = dom.innerHeight || dom.clientHeight
+  await nextTick()
+  const dom = screenAdapterRef.value
+  const boundingClientRectInfo = dom.getBoundingClientRect()
+  const innerWidth = boundingClientRectInfo.width || dom.innerWidth || dom.clientWidth
+  const innerHeight = boundingClientRectInfo.height || dom.innerHeight || dom.clientHeight
+  const offsetX = boundingClientRectInfo.x
+  const offsetY = boundingClientRectInfo.y
   let { width, height, maxAspectRatio, mode } = props
   // 计算缩放值
   let scale = 1
@@ -135,10 +138,6 @@ const initOptions = async () => {
       break
     }
   }
-  await nextTick()
-  const info = screenAdapterInnerContentRef.value.getBoundingClientRect()
-  const offsetX = info.x
-  const offsetY = info.y
   options.value = { ...options.value, width, height, innerWidth, innerHeight, scale, scaleX, scaleY, offsetX, offsetY }
   emit('change', options.value)
   // console.log('\x1b[38;2;0;151;255m%c%s\x1b[0m', 'color:#0097ff;padding:16px 0;', `------->Breathe:options.value`, options.value)
@@ -215,14 +214,12 @@ const StyleScreenAdapterContentView = computed(() => {
 
 let observer: ResizeObserver
 let timer: any = 0
-onMounted(() => {
+onMounted(async () => {
   // 实时校准布局 额外添加监听器
   if (props.layoutSync) {
     watch(
       () => `${props.width}-${props.height}-${props.mode}-${props.maxAspectRatio}`,
-      () => {
-        initOptions()
-      }
+      () => initOptions()
     )
     // 创建dom监听
     const createObserver = () => {
@@ -231,7 +228,7 @@ onMounted(() => {
     }
     createObserver()
   } else {
-    initOptions() // 仅第一次初始化
+    await initOptions() // 仅第一次初始化
   }
 
   // 注册鼠标快捷缩放事件
@@ -246,9 +243,10 @@ onMounted(() => {
         // 获取当前鼠标在浏览器窗口的位置
         const { clientX, clientY } = e
         const { offsetX, offsetY, scale } = options.value
-        // 获取鼠标在当前容器的位置
-        const mouseClientX = (clientX - offsetX) / scale
-        const mouseClientY = (clientY - offsetY) / scale
+        // 计算鼠标在当前容器的位置
+        let mouseClientX = (clientX - offsetX) / scale
+        let mouseClientY = (clientY - offsetY) / scale
+        // mouseClientX = 0
         options.value.mouseClientX = mouseClientX
         options.value.mouseClientY = mouseClientY
       }
