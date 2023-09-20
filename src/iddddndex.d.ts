@@ -1,4 +1,5 @@
-import PrScreenAdapter from './PrScreenAdapter.vue'
+// @ts-ignore
+import PrScreenAdapter from './PrScreenAdapter/PrScreenAdapter.vue'
 import type { Plugin } from 'vue'
 declare module 'vue' {
   export interface GlobalComponents {
@@ -7,4 +8,4 @@ declare module 'vue' {
 }
 export { PrScreenAdapter }
 
-export default {} as Plugin
+export default Plugin

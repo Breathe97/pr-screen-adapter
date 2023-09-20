@@ -1,10 +1,21 @@
 {
   "name": "pr-screen-adapter",
-  "version": "1.2.8",
-  "description": "基于vue3 封装的一个基于外部容器自适应缩放的组件。",
+  "private": true,
+  "version": "0.0.0",
   "type": "module",
-  "main": "./src/components/PrScreenAdapter/index.js",
-  "types": "./src/components/PrScreenAdapter/index.d.ts",
-  "author": "Breathe",
-  "license": "ISC"
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "pr-screen-adapter": "^1.2.10",
+    "vue": "^3.3.4"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^4.2.3",
+    "typescript": "^5.0.2",
+    "vite": "^4.4.5",
+    "vue-tsc": "^1.8.5"
+  }
 }
