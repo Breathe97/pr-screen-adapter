@@ -1,12 +1,23 @@
 <script setup lang="ts">
 // import { PrScreenAdapter } from '../core/dist/index.js'
-import { PrScreenAdapter } from 'pr-screen-adapter'
+// import { PrScreenAdapter } from 'pr-screen-adapter'
+import contentContainer from './components/contentContainer/ContentContainer.vue'
 </script>
 
 <template>
   <div id="app" style="position: relative; width: 100vw; height: 100vh">
-    <PrScreenAdapter :width="3840" :height="2160" :layoutSync="true" :maxAspectRatio="3.6" :quickZoom="true" bg="#2f3030">
-      <div style="position: relative; height: 100%; width: 100%; background-color: #16294d; display: flex; align-items: center; justify-content: center; font-size: 42px">自定义内容</div>
+    <PrScreenAdapter :width="3840" :height="1080" :layoutSync="true" :maxAspectRatio="3.6" :quickZoom="true" bg="#2f3030">
+      <contentContainer>
+        <template #left>
+          <div style="position: relative; height: 100%; width: 100%; display: flex; align-items: center; justify-content: center; font-size: 42px">自定义左侧区域</div>
+        </template>
+        <template #center>
+          <div style="position: relative; height: 100%; width: 100%; display: flex; align-items: center; justify-content: center; font-size: 42px">自定义中间区域</div>
+        </template>
+        <template #right>
+          <div style="position: relative; height: 100%; width: 100%; display: flex; align-items: center; justify-content: center; font-size: 42px">自定义左侧区域</div>
+        </template>
+      </contentContainer>
     </PrScreenAdapter>
   </div>
 </template>
