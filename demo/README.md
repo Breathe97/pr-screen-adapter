@@ -2,6 +2,7 @@
 
 [在线预览](https://pryun.vip/pr-screen-adapter/)
 
+## 插件核心源码在 ./core 中 当前目录为插件应用的demo
 
 ## 使用方法
 
