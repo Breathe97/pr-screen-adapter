@@ -1,9 +1,10 @@
 // vite.config.js
 import { defineConfig } from 'vite'
 import dts from 'vite-plugin-dts'
+import vue from '@vitejs/plugin-vue'
 import libCss from 'vite-plugin-libcss'
 export default defineConfig({
-  plugins: [dts({ rollupTypes: false }), libCss()],
+  plugins: [vue(), dts({ rollupTypes: false }), libCss()],
   build: {
     cssCodeSplit: true, // 当启用时，在异步 chunk 中导入的 CSS 将内联到异步 chunk 本身，并在其被加载时一并获取。
     lib: {

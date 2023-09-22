@@ -9,7 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "pr-screen-adapter": "^1.2.10",
+    "pr-screen-adapter": "^1.2.11",
     "vue": "^3.3.4"
   },
   "devDependencies": {

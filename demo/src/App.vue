@@ -1,5 +1,5 @@
 <script setup lang="ts">
-// import { PrScreenAdapter } from '../core/dist/index.js'
+import { PrScreenAdapter } from '../../dist/index.js'
 // import { PrScreenAdapter } from 'pr-screen-adapter'
 import contentContainer from './components/contentContainer/ContentContainer.vue'
 </script>
