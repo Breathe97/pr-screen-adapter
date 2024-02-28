@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { PrScreenAdapter } from '../../dist/index.js'
+// import { PrScreenAdapter } from '../../dist/index.js'
 // import { PrScreenAdapter } from 'pr-screen-adapter'
 import contentContainer from './components/contentContainer/ContentContainer.vue'
 </script>
@@ -12,7 +12,7 @@ import contentContainer from './components/contentContainer/ContentContainer.vue
           <div style="position: relative; height: 100%; width: 100%; display: flex; align-items: center; justify-content: center; font-size: 42px">自定义左侧区域</div>
         </template>
         <template #center>
-          <div style="position: relative; height: 100%; width: 100%; display: flex; align-items: center; justify-content: center; font-size: 42px">自定义中间区域</div>
+          <div style="position: relative; height: 100%; width: 100%; display: flex; align-items: center; justify-content: center; font-size: 42px">按住ALT+鼠标滚轮实现缩放查看</div>
         </template>
         <template #right>
           <div style="position: relative; height: 100%; width: 100%; display: flex; align-items: center; justify-content: center; font-size: 42px">自定义左侧区域</div>
