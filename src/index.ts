@@ -5,12 +5,10 @@ export { PrScreenAdapter }
 
 const component = [PrScreenAdapter]
 
-const _PrScreenAdapter = {
+export default {
   install(App: any) {
     component.forEach((item) => {
       App.component(item.__name, item)
     })
   },
 }
-
-export default _PrScreenAdapter
