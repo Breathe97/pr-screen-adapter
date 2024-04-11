@@ -87,8 +87,5 @@
   },
   "[jsonc]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
-  },
-  "javascript.updateImportsOnFileMove.enabled": "always",
-  "git.openRepositoryInParentFolders": "never",
-  "editor.codeActionsOnSave": {}
+  }
 }
