@@ -1,28 +1,26 @@
 {
   // ----------------------- 个人常用
-  // 颜色主题
+  // // 颜色主题
   // "workbench.colorTheme": "Monokai",
-  // 文件夹图标
+  // // 文件夹图标
   // "workbench.iconTheme": "material-icon-theme",
-  // 自定义颜色
+  // // 自定义颜色
   // "workbench.colorCustomizations": {
   //   "editor.selectionHighlightBorder": "#0097ff",
   //   "editor.selectionBackground": "#0099ff97",
   //   "editor.findMatchBorder": "#f81212"
   // },
-  // 关闭git警告 (不用vscoed的git插件 用不来)
+  // // 关闭git警告 (不用vscoed的git插件 用不来)
   // "git.ignoreMissingGitWarning": true,
-  // 打开编辑器 命令行控制台
+  // // 打开编辑器 命令行控制台
   // "window.commandCenter": true,
-  // 删除文件时不需要确认
+  // // 删除文件时不需要确认
   // "explorer.confirmDelete": false,
-  // 重命名ts文件时 自动更新引入
+  // // 重命名ts文件时 自动更新引入
   // "typescript.updateImportsOnFileMove.enabled": "always",
-  // 不受信任的文件也可以直接打开
-  // "security.workspace.trust.untrustedFiles": "open",
-  // 提交的时候默认直接暂存所有
+  // // 提交的时候默认直接暂存所有
   // "git.enableSmartCommit": true,
-  // 同步的时候不用确认
+  // // 同步的时候不用确认
   // "git.confirmSync": false,
 
   // ----------------------- 通用建议
@@ -31,6 +29,8 @@
   "editor.tabSize": 2,
   // 去除dom中函数括号里面的提示 $event=>
   "editor.inlayHints.enabled": "off",
+  // 打开同名文件不覆盖
+  "workbench.editor.enablePreview": false,
   // 显示建议的时候每次都是选择第一个建议
   "editor.suggestSelection": "first",
   // 当文件中只有一个子项目时以资源路径显示
@@ -87,5 +87,8 @@
   },
   "[jsonc]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
-  }
+  },
+  "javascript.updateImportsOnFileMove.enabled": "always",
+  "git.openRepositoryInParentFolders": "never",
+  "editor.codeActionsOnSave": {},
 }
